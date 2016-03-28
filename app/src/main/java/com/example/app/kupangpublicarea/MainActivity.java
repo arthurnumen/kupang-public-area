@@ -21,7 +21,6 @@ public class MainActivity extends Activity {
         petaSPBU.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
                 Intent i = new Intent(getApplicationContext(),MapsActivity.class);
-
                 startActivity(i);
             }
         });
@@ -34,7 +33,8 @@ public class MainActivity extends Activity {
 
         infoAplikasi.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
-                
+                Intent i = new Intent(getApplicationContext(),AboutActivity.class);
+                startActivity(i);
             }
         });
 
