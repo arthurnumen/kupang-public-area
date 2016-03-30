@@ -27,7 +27,8 @@ public class MainActivity extends Activity {
 
         daftarSPBU.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
-
+                Intent i = new Intent(getApplicationContext(),SPBUListActivity.class);
+                startActivity(i);
             }
         });
 

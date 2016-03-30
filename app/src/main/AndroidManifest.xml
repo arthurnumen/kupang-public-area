@@ -51,6 +51,10 @@
             android:label="@string/title_activity_maps">
         </activity>
         <activity
+            android:name="com.example.app.kupangpublicarea.SPBUListActivity"
+            android:label="@string/title_activity_maps">
+        </activity>
+        <activity
             android:name="com.example.app.kupangpublicarea.AboutActivity"
             android:label="@string/title_activity_maps">
         </activity>

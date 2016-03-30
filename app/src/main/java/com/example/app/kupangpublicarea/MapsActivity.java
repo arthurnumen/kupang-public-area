@@ -226,12 +226,12 @@ public class MapsActivity extends FragmentActivity implements
         mMap.addMarker(new MarkerOptions()
                 .position(spbu2)
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.gps))
-                .title("SPBU Oepura").snippet("HR. Horo No. 25, Oepura, Kupang, NTT"));
+                .title("SPBU Oepura").snippet("Jl. HR. Horo No. 25, Oepura, Kupang, NTT"));
 
         mMap.addMarker(new MarkerOptions()
                 .position(spbu3)
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.gps))
-                .title("SPBU Oebufu").snippet("JL WJ Lalamentik, Oebobo, Kupang, NTT"));
+                .title("SPBU Oebufu").snippet("Jl. WJ Lalamentik, Oebobo, Kupang, NTT"));
 
         mMap.addMarker(new MarkerOptions()
                 .position(spbu4)
