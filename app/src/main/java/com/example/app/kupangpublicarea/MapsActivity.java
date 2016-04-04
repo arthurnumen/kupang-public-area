@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -11,6 +12,13 @@ import android.provider.SyncStateContract;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.widget.TextView;
+
+import com.akexorcist.googledirection.DirectionCallback;
+import com.akexorcist.googledirection.GoogleDirection;
+import com.akexorcist.googledirection.constant.TransportMode;
+import com.akexorcist.googledirection.model.Direction;
+import com.akexorcist.googledirection.model.Route;
+import com.akexorcist.googledirection.util.DirectionConverter;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -26,10 +34,13 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+
 public class MapsActivity extends FragmentActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        LocationListener {
+        LocationListener,
+        DirectionCallback {
 
     public static final String TAG = MapsActivity.class.getSimpleName();
 
@@ -51,6 +62,9 @@ public class MapsActivity extends FragmentActivity implements
     private LatLng spbu4 = new LatLng(-10.156205, 123.643207);
     private LatLng spbu5 = new LatLng(-10.154213, 123.633478);
     private LatLng spbu6 = new LatLng(-10.151142, 123.603221);
+
+    private String mapDirectionKey = "AIzaSyCOuMkMYCahosvqF0UoV-egXkvy-_g-aUY";
+    private String[] colors = {"#7fff7272", "#7f31c7c5", "#7fff8a00"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -175,6 +189,33 @@ public class MapsActivity extends FragmentActivity implements
             Log.d(TAG, "Location is not null");
             handleNewLocation(mLastLocation);
         }
+
+        GoogleDirection.withServerKey(mapDirectionKey)
+                .from(new LatLng(-10.1771997, 123.6070329))
+                .to(new LatLng(-10.182282, 123.601653))
+                .transportMode(TransportMode.DRIVING)
+                .alternativeRoute(true)
+                .execute(this);
+    }
+
+    @Override
+    public void onDirectionSuccess(Direction direction, String rawBody) {
+        Log.d(TAG, "Direction Status: " + direction.getStatus());
+        if (direction.isOK()) {
+            for (int i = 0; i < direction.getRouteList().size(); i++) {
+                Route route = direction.getRouteList().get(i);
+                String color = colors[i % colors.length];
+                ArrayList<LatLng> directionPositionList = route.getLegList().get(0).getDirectionPoint();
+                mMap.addPolyline(DirectionConverter.createPolyline(this, directionPositionList, 5, Color.parseColor(color)));
+            }
+        } else {
+            Log.d(TAG, "Direction NOT OK");
+        }
+    }
+
+    @Override
+    public void onDirectionFailure(Throwable t) {
+
     }
 
     @Override
