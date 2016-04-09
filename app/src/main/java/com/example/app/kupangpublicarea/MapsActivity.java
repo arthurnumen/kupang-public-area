@@ -12,6 +12,7 @@ import android.provider.SyncStateContract;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.akexorcist.googledirection.DirectionCallback;
 import com.akexorcist.googledirection.GoogleDirection;
@@ -32,15 +33,21 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener,
-        DirectionCallback {
+        DirectionCallback,
+        OnMarkerClickListener {
 
     public static final String TAG = MapsActivity.class.getSimpleName();
 
@@ -56,6 +63,8 @@ public class MapsActivity extends FragmentActivity implements
     private LocationRequest mLocationRequest;
     private Location mLastLocation;
 
+    private Marker myMarker;
+    private LatLng latLng;
     private LatLng spbu1 = new LatLng(-10.182282, 123.601653);
     private LatLng spbu2 = new LatLng(-10.190474, 123.607171);
     private LatLng spbu3 = new LatLng(-10.174254, 123.614981);
@@ -71,6 +80,8 @@ public class MapsActivity extends FragmentActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         setUpMapIfNeeded();
+
+        mMap.setOnMarkerClickListener(this);
 
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -158,14 +169,11 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     private void handleNewLocation(Location location) {
-        Log.d(TAG, location.toString());
-
         double currentLatitude = location.getLatitude();
         double currentLongitude = location.getLongitude();
 
-        LatLng latLng = new LatLng(currentLatitude, currentLongitude);
+        latLng = new LatLng(currentLatitude, currentLongitude);
 
-        //mMap.addMarker(new MarkerOptions().position(new LatLng(currentLatitude, currentLongitude)).title("Current Location"));
         MarkerOptions options = new MarkerOptions()
                 .position(latLng)
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.location))
@@ -176,31 +184,31 @@ public class MapsActivity extends FragmentActivity implements
 
     @Override
     public void onConnected(Bundle bundle) {
-        Log.d(TAG, "Device Connected");
-
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
-        Log.d(TAG, "Device Connected Again");
         if (mLastLocation == null) {
-            Log.d(TAG, "Location is null");
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         }
         else {
-            Log.d(TAG, "Location is not null");
             handleNewLocation(mLastLocation);
         }
-
-        GoogleDirection.withServerKey(mapDirectionKey)
-                .from(new LatLng(-10.1771997, 123.6070329))
-                .to(new LatLng(-10.182282, 123.601653))
-                .transportMode(TransportMode.DRIVING)
-                .alternativeRoute(true)
-                .execute(this);
     }
 
     @Override
     public void onDirectionSuccess(Direction direction, String rawBody) {
-        Log.d(TAG, "Direction Status: " + direction.getStatus());
+        mMap.clear();
+        handleNewLocation(mLastLocation);
+        setSPBU();
+
+//        List<Polyline> polylines = new ArrayList<Polyline>();
+//
+//        for(Polyline line : polylines)
+//        {
+//            line.remove();
+//        }
+//
+//        polylines.clear();
+
         if (direction.isOK()) {
             for (int i = 0; i < direction.getRouteList().size(); i++) {
                 Route route = direction.getRouteList().get(i);
@@ -209,7 +217,7 @@ public class MapsActivity extends FragmentActivity implements
                 mMap.addPolyline(DirectionConverter.createPolyline(this, directionPositionList, 5, Color.parseColor(color)));
             }
         } else {
-            Log.d(TAG, "Direction NOT OK");
+            Toast.makeText(this, "Petunjuk arah tidak ditemukan", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -225,37 +233,34 @@ public class MapsActivity extends FragmentActivity implements
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        /*
-         * Google Play services can resolve some errors it detects.
-         * If the error has a resolution, try sending an Intent to
-         * start a Google Play services activity that can resolve
-         * error.
-         */
         if (connectionResult.hasResolution()) {
             try {
-                // Start an Activity that tries to resolve the error
                 connectionResult.startResolutionForResult(this, CONNECTION_FAILURE_RESOLUTION_REQUEST);
-                /*
-                 * Thrown if Google Play services canceled the original
-                 * PendingIntent
-                 */
             } catch (IntentSender.SendIntentException e) {
-                // Log the error
                 e.printStackTrace();
             }
         } else {
-            /*
-             * If no resolution is available, display a dialog to the
-             * user with the error.
-             */
             Log.i(TAG, "Location services connection failed with code " + connectionResult.getErrorCode());
         }
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        Log.i(TAG, "Location Changed");
         handleNewLocation(location);
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        Toast.makeText(this, marker.getTitle(), Toast.LENGTH_LONG).show();
+
+        GoogleDirection.withServerKey(mapDirectionKey)
+                    .from(latLng)
+                    .to(marker.getPosition())
+                    .transportMode(TransportMode.DRIVING)
+                    .alternativeRoute(true)
+                    .execute(this);
+
+        return true;
     }
 
     protected void setSPBU() {
