@@ -1,6 +1,8 @@
 package com.example.app.kupangpublicarea;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -11,6 +13,8 @@ import android.provider.Settings;
 import android.provider.SyncStateContract;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -74,6 +78,8 @@ public class MapsActivity extends FragmentActivity implements
 
     private String mapDirectionKey = "AIzaSyCOuMkMYCahosvqF0UoV-egXkvy-_g-aUY";
     private String[] colors = {"#7fff7272", "#7f31c7c5", "#7fff8a00"};
+
+    final Context context = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -260,6 +266,25 @@ public class MapsActivity extends FragmentActivity implements
                     .alternativeRoute(true)
                     .execute(this);
 
+        final Dialog dialog = new Dialog(context);
+        dialog.setContentView(R.layout.popup);
+        dialog.setTitle("Info " + marker.getTitle());
+
+        TextView text = (TextView) dialog.findViewById(R.id.text);
+        text.setText(marker.getSnippet());
+
+        Button dialogButton = (Button) dialog.findViewById(R.id.dialogButtonOK);
+
+        dialogButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+
+
         return true;
     }
 
@@ -267,7 +292,7 @@ public class MapsActivity extends FragmentActivity implements
         mMap.addMarker(new MarkerOptions()
                 .position(spbu1)
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.gps))
-                .title("SPBU Naikoten 1").snippet("Jl. Soeharto No. 70, Naikoten I, Kupang, NTT"));
+                .title("SPBU Naikoten 1").snippet("Alamat: Jl. Soeharto No. 70, Naikoten I, Kupang, NTT \nFasilitas: Toilet, ATM"));
 
         mMap.addMarker(new MarkerOptions()
                 .position(spbu2)
