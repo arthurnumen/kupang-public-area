@@ -22,7 +22,6 @@ public class ListAdapter extends ArrayAdapter<Phone> {
     }
 
     static class ViewHolder {
-        protected ImageView icon;
         protected TextView nama;
         protected TextView keterangan;
     }
@@ -35,17 +34,14 @@ public class ListAdapter extends ArrayAdapter<Phone> {
             view = inflater.inflate(R.layout.item, null);
 
             ViewHolder holder = new ViewHolder();
-            holder.icon = (ImageView) view.findViewById(R.id.item_icon);
             holder.nama = (TextView) view.findViewById(R.id.item_nama);
-            holder.keterangan = (TextView) view
-                    .findViewById(R.id.item_keterangan);
+            holder.keterangan = (TextView) view.findViewById(R.id.item_keterangan);
             view.setTag(holder);
         }
 
         ViewHolder holder = (ViewHolder) view.getTag();
         Phone phone = list.get(position);
 
-        holder.icon.setImageResource(R.drawable.info);
         holder.nama.setText(phone.getName());
         holder.keterangan.setText(phone.getBrand());
 
