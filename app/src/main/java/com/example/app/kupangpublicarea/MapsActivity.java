@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.Color;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.provider.SyncStateContract;
@@ -257,14 +258,26 @@ public class MapsActivity extends FragmentActivity implements
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        Toast.makeText(this, marker.getTitle(), Toast.LENGTH_LONG).show();
-
         GoogleDirection.withServerKey(mapDirectionKey)
                     .from(latLng)
                     .to(marker.getPosition())
                     .transportMode(TransportMode.DRIVING)
                     .alternativeRoute(true)
                     .execute(this);
+
+        Double l1 = latLng.latitude;
+        Double l2 = latLng.longitude;
+        String coordl1 = l1.toString();
+        String coordl2 = l2.toString();
+        final Double ll1 = Double.parseDouble(coordl1);
+        final Double ll2 = Double.parseDouble(coordl2);
+
+        Double k1 = marker.getPosition().latitude;
+        Double k2 = marker.getPosition().longitude;
+        String coordk1 = k1.toString();
+        String coordk2 = k2.toString();
+        final Double kk1 = Double.parseDouble(coordk1);
+        final Double kk2 = Double.parseDouble(coordk2);
 
         final Dialog dialog = new Dialog(context);
         dialog.setContentView(R.layout.popup);
@@ -274,18 +287,21 @@ public class MapsActivity extends FragmentActivity implements
         text.setText(marker.getSnippet());
 
         Button dialogButton = (Button) dialog.findViewById(R.id.dialogButtonOK);
+        dialogButton.setText("Open Map");
+        dialogButton.setWidth(500);
 
         dialogButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
+                Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse("http://maps.google.com/maps?saddr=" + ll1 + "," + ll2 + "&daddr=" + kk1 + "," + kk2));
+                startActivity(intent);
             }
         });
 
         dialog.show();
 
-
-        return true;
+        return false;
     }
 
     protected void setSPBU() {
